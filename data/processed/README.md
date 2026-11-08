@@ -1,7 +1,21 @@
 # Processed data
 
-The processed CSV files used by the SQL database and Power BI report are not currently included in this repository.
+This folder contains the six cleaned CSV tables used by the SQL analysis and Power BI report.
 
-Download the source data listed in docs/data-sources.md, then follow docs/data-preparation.md. Add the final country-year CSV files here if you are permitted to redistribute them.
+| File | Data rows |
+|---|---:|
+| Dim_Country.csv | 12 |
+| Dim_Year.csv | 19 |
+| Fact_Production.csv | 228 |
+| Fact_Consumption.csv | 228 |
+| Fact_Trade.csv | 228 |
+| Fact_oilsales.csv | 19 |
 
-Do not commit credentials, API keys, or private data.
+The production, consumption, and trade tables are sorted by Country and then Year. All source rows were retained; zero values in trade data were preserved.
+
+Units:
+- Production and consumption: TWh.
+- Imports and exports: kb/d (annual average rates).
+- Oil prices: original source unit should be verified before conversion to USD/barrel.
+
+See [data sources](../../docs/data-sources.md), [data preparation](../../docs/data-preparation.md), and the [data dictionary](../../docs/data-dictionary.md).

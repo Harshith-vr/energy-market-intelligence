@@ -38,29 +38,42 @@ Brazil, Canada, China, India, Iran, Iraq, Mexico, Norway, Russia, Saudi Arabia, 
 
 ## Repository structure
 
-- sql/ – MySQL analysis queries
-- powerbi/ – Power BI report
-- data/processed/ – location for prepared CSV files
-- screenshots/ – dashboard screenshots
-- docs/ – data sources, preparation notes, and data dictionary
+- `sql/` – MySQL analysis queries
+- `powerbi/` – Power BI report
+- `data/processed/` – six cleaned CSV tables used in the analysis
+- `screenshots/` – dashboard screenshots
+- `docs/` – data sources, preparation notes, and data dictionary
+
+## Data files and row counts
+
+The processed tables are included in [data/processed](data/processed/):
+
+| File | Data rows | Description |
+|---|---:|---|
+| `Dim_Country.csv` | 12 | Country-to-region mapping |
+| `Dim_Year.csv` | 19 | Years 2000–2018 |
+| `Fact_Production.csv` | 228 | 12 countries × 19 years |
+| `Fact_Consumption.csv` | 228 | 12 countries × 19 years |
+| `Fact_Trade.csv` | 228 | 12 countries × 19 years |
+| `Fact_oilsales.csv` | 19 | Annual crude oil prices |
+
+The three country-year fact tables are sorted by **Country, then Year**. No data rows were intentionally removed during sorting or upload. Zero values in the trade table have been preserved.
 
 ## Data and units
 
 - Production and consumption are represented in **TWh**.
-- Imports and exports are represented in **thousand barrels per day (kb/d)**.
+- Imports and exports are represented in **thousand barrels per day (kb/d)**. These are annual average rates; do not sum them across years and describe the result as cumulative physical volumes.
 - Crude oil prices are converted from **USD per cubic metre to USD per barrel** by dividing by 6.2898, only when the source values are still in USD/m³. The result is in current USD, not inflation-adjusted USD.
-- Trade values in kb/d are annual average rates. They should be compared as yearly rates or averages, not summed and described as cumulative physical volumes.
-
-The processed CSV files are not included yet. See [data sources](docs/data-sources.md) and [data preparation notes](docs/data-preparation.md) before loading data.
 
 ## How to use
 
-1. Download the source datasets listed in docs/data-sources.md.
-2. Prepare the country-year tables and load them into the MySQL tables described in docs/data-dictionary.md.
-3. Run sql/energy_analysis.sql in MySQL 8 or later.
-4. Open powerbi/Energy_analysis.pbix, update the data-source connection, and refresh the report.
+1. Review the source links in [docs/data-sources.md](docs/data-sources.md).
+2. Review the expected database columns in [docs/data-dictionary.md](docs/data-dictionary.md).
+3. Load the CSV files from `data/processed/` into the corresponding MySQL tables.
+4. Run [sql/energy_analysis.sql](sql/energy_analysis.sql) in MySQL 8 or later.
+5. Open [powerbi/Energy_analysis.pbix](powerbi/Energy_analysis.pbix), update the data-source connection if needed, and refresh the report.
 
-**Important:** The SQL script creates and populates Dim_Year, but expects Dim_Country and the fact tables to be loaded beforehand. Review the data dictionary before running it.
+**Important:** The SQL script creates and populates `Dim_Year`, but expects `Dim_Country` and the fact tables to be loaded beforehand. Check the oil-price source unit before using the conversion expression in SQL; do not convert the prices twice.
 
 ## Key analysis questions
 
