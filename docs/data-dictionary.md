@@ -1,24 +1,30 @@
-# Data dictionary and database prerequisites
+# Data dictionary and database schema
 
-The SQL script is written for MySQL 8+ and expects the following tables to be loaded before most analysis queries run.
+The project uses MySQL 8.0+. Run [schema.sql](../sql/schema.sql) to create the database and tables before importing the CSV files.
 
-| Table | Required columns | Description |
+| Table | Columns | Description |
 |---|---|---|
-| Dim_Country | Country, Region | One row per selected country and its region |
-| Fact_Production | Country, Year, Production | Annual oil production; TWh |
-| Fact_Consumption | Country, Year, Consumption | Annual oil consumption; TWh |
-| Fact_Trade | Country, Year, Imports, Exports | Annual average import/export rates; kb/d |
-| Fact_oilsales | Year, oilprices | Annual crude oil price; verify original source unit |
+| Dim_Country | Country (PK), Region | One row per selected country and its region |
+| Dim_Year | Year (PK) | Analysis years 2000–2018 |
+| Fact_Production | Country (FK), Year (FK), Production | Annual oil production; TWh |
+| Fact_Consumption | Country (FK), Year (FK), Consumption | Annual oil consumption; TWh |
+| Fact_Trade | Country (FK), Year (FK), Exports, Imports | Annual average trade rates; kb/d |
+| Fact_oilsales | Year (FK), oilprices | Annual crude oil price; verify source unit |
 
-## Recommended grain and keys
+## Grain and keys
 
-- Production, consumption, and trade tables should have one record per country and year.
-- Use a composite key or unique constraint on (Country, Year) for each country-year fact table.
-- Dim_Country.Country should match the country labels used in the fact tables.
-- Dim_Year contains the years 2000–2018. The SQL script creates and populates this table safely on repeated runs.
+- Production, consumption, and trade each contain one record per country and year.
+- The country-year fact tables use a composite primary key on `(Country, Year)`.
+- `Dim_Country.Country` is the country key referenced by the country-year fact tables.
+- `Dim_Year.Year` contains the years 2000–2018 and is referenced by all fact tables.
+- `Fact_oilsales` has one row per year.
 
-## Important unit notes
+## Column types
 
-- Production and consumption are in TWh.
-- Trade is in kb/d. The SQL queries use averages when comparing annual trade rates across multiple years; summing annual rates does not produce cumulative barrels.
-- The oil-price query divides by 6.2898 to convert USD/m³ to USD/barrel. Use that expression only if Fact_oilsales.oilprices still contains USD/m³ values. If the column is already converted, remove the division.
+The schema uses `VARCHAR(100)` for country and region labels, `SMALLINT` for years, and `DECIMAL(18,6)` for numeric measures. This preserves the decimal values in the CSV exports without using floating-point storage.
+
+## Units
+
+- Production and consumption: TWh.
+- Imports and exports: kb/d, annual average rates.
+- Oil prices: confirm the original source unit. The analysis query divides by 6.2898 to convert USD/m³ to USD/barrel only if the values are still in USD/m³. If already converted, remove that division.
